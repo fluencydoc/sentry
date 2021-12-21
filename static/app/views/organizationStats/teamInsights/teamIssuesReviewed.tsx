@@ -123,7 +123,7 @@ class TeamIssuesReviewed extends AsyncComponent<Props, State> {
 
     return (
       <Fragment>
-        <IssuesChartWrapper>
+        <ChartWrapper>
           {loading && <Placeholder height="200px" />}
           {!loading && (
             <BarChart
@@ -148,7 +148,7 @@ class TeamIssuesReviewed extends AsyncComponent<Props, State> {
               ]}
             />
           )}
-        </IssuesChartWrapper>
+        </ChartWrapper>
         <StyledPanelTable
           headers={[
             t('Project'),
@@ -183,9 +183,6 @@ export default TeamIssuesReviewed;
 
 const ChartWrapper = styled('div')`
   padding: ${space(2)} ${space(2)} 0 ${space(2)};
-`;
-
-const IssuesChartWrapper = styled(ChartWrapper)`
   border-bottom: 1px solid ${p => p.theme.border};
 `;
 

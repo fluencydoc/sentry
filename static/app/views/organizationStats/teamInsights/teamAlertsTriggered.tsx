@@ -1,13 +1,22 @@
+import {Fragment} from 'react';
 import styled from '@emotion/styled';
 
 import AsyncComponent from 'sentry/components/asyncComponent';
 import BarChart from 'sentry/components/charts/barChart';
 import {DateTimeObject} from 'sentry/components/charts/utils';
+import IdBadge from 'sentry/components/idBadge';
+import Link from 'sentry/components/links/link';
 import LoadingIndicator from 'sentry/components/loadingIndicator';
 import {getParams} from 'sentry/components/organizations/globalSelectionHeader/getParams';
-import {t} from 'sentry/locale';
+import {IconArrow} from 'sentry/icons';
+import {t, tct} from 'sentry/locale';
 import space from 'sentry/styles/space';
-import {Organization} from 'sentry/types';
+import {Organization, Project} from 'sentry/types';
+import {formatPercentage} from 'sentry/utils/formatters';
+import {Color} from 'sentry/utils/theme';
+import {IncidentRule} from 'sentry/views/alerts/incidentRules/types';
+
+import PanelTable from '../../../components/panels/panelTable';
 
 import {
   barAxisLabel,
@@ -17,13 +26,20 @@ import {
 
 type AlertsTriggered = Record<string, number>;
 
+type AlertsTriggeredRule = IncidentRule & {
+  weeklyAvg: number;
+  totalThisWeek: number;
+};
+
 type Props = AsyncComponent['props'] & {
   organization: Organization;
+  projects: Project[];
   teamSlug: string;
 } & DateTimeObject;
 
 type State = AsyncComponent['state'] & {
   alertsTriggered: AlertsTriggered | null;
+  alertsTriggeredRules: AlertsTriggeredRule[] | null;
 };
 
 class TeamAlertsTriggered extends AsyncComponent<Props, State> {
@@ -33,6 +49,7 @@ class TeamAlertsTriggered extends AsyncComponent<Props, State> {
     return {
       ...super.getDefaultState(),
       alertsTriggered: null,
+      alertsTriggeredRules: null,
     };
   }
 
@@ -44,6 +61,15 @@ class TeamAlertsTriggered extends AsyncComponent<Props, State> {
       [
         'alertsTriggered',
         `/teams/${organization.slug}/${teamSlug}/alerts-triggered/`,
+        {
+          query: {
+            ...getParams(datetime),
+          },
+        },
+      ],
+      [
+        'alertsTriggeredRules',
+        `/teams/${organization.slug}/${teamSlug}/alerts-triggered-index/`,
         {
           query: {
             ...getParams(datetime),
@@ -67,6 +93,24 @@ class TeamAlertsTriggered extends AsyncComponent<Props, State> {
     }
   }
 
+  renderTrend(rule: AlertsTriggeredRule) {
+    const {weeklyAvg, totalThisWeek} = rule;
+    const diff = totalThisWeek - weeklyAvg;
+
+    // weeklyAvg can only be 0 only if totalThisWeek is also 0
+    // but those should never be returned in alerts-triggered-index request
+    if (weeklyAvg === 0) {
+      return '\u2014';
+    }
+
+    return (
+      <SubText color={diff <= 0 ? 'green300' : 'red300'}>
+        {formatPercentage(Math.abs(diff / weeklyAvg), 0)}
+        <PaddedIconArrow direction={diff <= 0 ? 'down' : 'up'} size="xs" />
+      </SubText>
+    );
+  }
+
   renderLoading() {
     return (
       <ChartWrapper>
@@ -76,31 +120,65 @@ class TeamAlertsTriggered extends AsyncComponent<Props, State> {
   }
 
   renderBody() {
-    const {alertsTriggered} = this.state;
+    const {organization, period, projects} = this.props;
+    const {alertsTriggered, alertsTriggeredRules} = this.state;
     const data = convertDayValueObjectToSeries(alertsTriggered ?? {});
     const seriesData = convertDaySeriesToWeeks(data);
 
     return (
-      <ChartWrapper>
-        {alertsTriggered && (
-          <BarChart
-            style={{height: 190}}
-            isGroupedByDate
-            useShortDate
-            period="7d"
-            legend={{right: 0, top: 0}}
-            yAxis={{minInterval: 1}}
-            xAxis={barAxisLabel(seriesData.length)}
-            series={[
-              {
-                seriesName: t('Alerts Triggered'),
-                data: seriesData,
-                silent: true,
-              },
-            ]}
-          />
-        )}
-      </ChartWrapper>
+      <Fragment>
+        <ChartWrapper>
+          {alertsTriggered && (
+            <BarChart
+              style={{height: 190}}
+              isGroupedByDate
+              useShortDate
+              period="7d"
+              legend={{right: 0, top: 0}}
+              yAxis={{minInterval: 1}}
+              xAxis={barAxisLabel(seriesData.length)}
+              series={[
+                {
+                  seriesName: t('Alerts Triggered'),
+                  data: seriesData,
+                  silent: true,
+                },
+              ]}
+            />
+          )}
+        </ChartWrapper>
+        <StyledPanelTable
+          headers={[
+            t('Alert Rule'),
+            t('Project'),
+            <AlignRight key="last">{tct('Last [period] Average', {period})}</AlignRight>,
+            <AlignRight key="curr">{t('This Week')}</AlignRight>,
+            <AlignRight key="diff">{t('Difference')}</AlignRight>,
+          ]}
+        >
+          {alertsTriggeredRules &&
+            alertsTriggeredRules.map(rule => (
+              <Fragment key={rule.id}>
+                <div>
+                  <Link
+                    to={`/organizations/${organization.id}/alerts/rules/details/${rule.id}/`}
+                  >
+                    {rule.name}
+                  </Link>
+                </div>
+                <ProjectBadgeContainer>
+                  <ProjectBadge
+                    avatarSize={18}
+                    project={projects.find(p => p.slug === rule.projects[0])}
+                  />
+                </ProjectBadgeContainer>
+                <AlignRight>{rule.weeklyAvg}</AlignRight>
+                <AlignRight>{rule.totalThisWeek}</AlignRight>
+                <AlignRight>{this.renderTrend(rule)}</AlignRight>
+              </Fragment>
+            ))}
+        </StyledPanelTable>
+      </Fragment>
     );
   }
 }
@@ -109,4 +187,39 @@ export default TeamAlertsTriggered;
 
 const ChartWrapper = styled('div')`
   padding: ${space(2)} ${space(2)} 0 ${space(2)};
+  border-bottom: 1px solid ${p => p.theme.border};
+`;
+
+const StyledPanelTable = styled(PanelTable)`
+  grid-template-columns: 1fr 0.5fr 0.2fr 0.2fr 0.2fr;
+  font-size: ${p => p.theme.fontSizeMedium};
+  white-space: nowrap;
+  margin-bottom: 0;
+  border: 0;
+  box-shadow: unset;
+
+  & > div {
+    padding: ${space(1)} ${space(2)};
+  }
+`;
+
+const ProjectBadgeContainer = styled('div')`
+  display: flex;
+`;
+
+const ProjectBadge = styled(IdBadge)`
+  flex-shrink: 0;
+`;
+
+const AlignRight = styled('div')`
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+`;
+
+const PaddedIconArrow = styled(IconArrow)`
+  margin: 0 ${space(0.5)};
+`;
+
+const SubText = styled('div')<{color: Color}>`
+  color: ${p => p.theme[p.color]};
 `;
