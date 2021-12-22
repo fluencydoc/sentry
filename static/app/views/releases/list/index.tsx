@@ -437,15 +437,13 @@ class ReleasesList extends AsyncView<Props, State> {
           return (
             <Fragment>
               {singleProjectSelected && this.projectHasSessions && isMobileProject && (
-                <Feature features={['organizations:release-adoption-chart']}>
-                  <ReleasesAdoptionChart
-                    organization={organization}
-                    selection={selection}
-                    location={location}
-                    router={router}
-                    activeDisplay={activeDisplay}
-                  />
-                </Feature>
+                <ReleasesAdoptionChart
+                  organization={organization}
+                  selection={selection}
+                  location={location}
+                  router={router}
+                  activeDisplay={activeDisplay}
+                />
               )}
 
               {releases.map((release, index) => (
@@ -480,13 +478,11 @@ class ReleasesList extends AsyncView<Props, State> {
     const activeDisplay = this.getDisplay();
 
     const hasSemver = organization.features.includes('semver');
-    const hasReleaseStages = organization.features.includes('release-adoption-stage');
     const hasAnyMobileProject = selection.projects
       .map(id => `${id}`)
       .map(ProjectsStore.getById)
       .some(project => project?.platform && isMobileRelease(project.platform));
-    const showReleaseAdoptionStages =
-      hasReleaseStages && hasAnyMobileProject && selection.environments.length === 1;
+    const showReleaseAdoptionStages = hasAnyMobileProject && selection.environments.length === 1;
     const hasReleasesSetup = releases && releases.length > 0;
 
     return (

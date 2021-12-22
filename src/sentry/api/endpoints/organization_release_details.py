@@ -352,10 +352,6 @@ class OrganizationReleaseDetailsEndpoint(
             except InvalidSortException:
                 return Response({"detail": "invalid sort"}, status=400)
 
-        with_adoption_stages = with_adoption_stages and features.has(
-            "organizations:release-adoption-stage", organization, actor=request.user
-        )
-
         return Response(
             serialize(
                 release,

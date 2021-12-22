@@ -228,7 +228,7 @@ describe('ReleasesList', function () {
     wrapper.unmount();
     const adoptionProps = {
       ...props,
-      organization: {...organization, features: ['release-adoption-stage']},
+      organization,
     };
     wrapper = mountWithTheme(
       <ReleasesList

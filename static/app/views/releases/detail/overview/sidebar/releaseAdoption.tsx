@@ -1,8 +1,8 @@
+import {Fragment} from 'react';
 import {withRouter, WithRouterProps} from 'react-router';
 import {useTheme} from '@emotion/react';
 import styled from '@emotion/styled';
 
-import Feature from 'sentry/components/acl/feature';
 import ChartZoom from 'sentry/components/charts/chartZoom';
 import ErrorPanel from 'sentry/components/charts/errorPanel';
 import LineChart from 'sentry/components/charts/lineChart';
@@ -230,7 +230,7 @@ function ReleaseAdoption({
   return (
     <div>
       {isMobileRelease(project.platform) && (
-        <Feature features={['release-adoption-stage']}>
+        <Fragment>
           <SidebarSection
             title={t('Adoption Stage')}
             icon={
@@ -260,7 +260,7 @@ function ReleaseAdoption({
               </NotAvailableWrapper>
             )}
           </SidebarSection>
-        </Feature>
+        </Fragment>
       )}
       <RelativeBox>
         <ChartLabel top="0px">
