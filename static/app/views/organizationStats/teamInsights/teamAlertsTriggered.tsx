@@ -1,4 +1,5 @@
 import {Fragment} from 'react';
+import {css} from '@emotion/react';
 import styled from '@emotion/styled';
 
 import AsyncComponent from 'sentry/components/asyncComponent';
@@ -155,6 +156,7 @@ class TeamAlertsTriggered extends AsyncComponent<Props, State> {
             <AlignRight key="curr">{t('This Week')}</AlignRight>,
             <AlignRight key="diff">{t('Difference')}</AlignRight>,
           ]}
+          isEmpty={!alertsTriggeredRules || alertsTriggeredRules.length === 0}
         >
           {alertsTriggeredRules &&
             alertsTriggeredRules.map(rule => (
@@ -201,6 +203,13 @@ const StyledPanelTable = styled(PanelTable)`
   & > div {
     padding: ${space(1)} ${space(2)};
   }
+  ${p =>
+    p.isEmpty &&
+    css`
+      & > div:last-child {
+        padding: 48px ${space(2)};
+      }
+    `}
 `;
 
 const ProjectBadgeContainer = styled('div')`
