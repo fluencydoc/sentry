@@ -1,4 +1,3 @@
-import {Fragment} from 'react';
 import {withRouter, WithRouterProps} from 'react-router';
 import {useTheme} from '@emotion/react';
 import styled from '@emotion/styled';
@@ -230,37 +229,35 @@ function ReleaseAdoption({
   return (
     <div>
       {isMobileRelease(project.platform) && (
-        <Fragment>
-          <SidebarSection
-            title={t('Adoption Stage')}
-            icon={
-              multipleEnvironments && (
-                <QuestionTooltip
-                  position="top"
-                  title={t(
-                    'See if a release has low adoption, been adopted by users, or replaced by another release. Select an environment above to view the stage this release is in.'
-                  )}
-                  size="sm"
-                />
-              )
-            }
-          >
-            {adoptionStageLabel && !multipleEnvironments ? (
-              <div>
-                <Tooltip title={adoptionStageLabel.tooltipTitle} isHoverable>
-                  <Tag type={adoptionStageLabel.type}>{adoptionStageLabel.name}</Tag>
-                </Tooltip>
-                <AdoptionEnvironment>
-                  {tct(`in [environment]`, {environment})}
-                </AdoptionEnvironment>
-              </div>
-            ) : (
-              <NotAvailableWrapper>
-                <NotAvailable />
-              </NotAvailableWrapper>
-            )}
-          </SidebarSection>
-        </Fragment>
+        <SidebarSection
+          title={t('Adoption Stage')}
+          icon={
+            multipleEnvironments && (
+              <QuestionTooltip
+                position="top"
+                title={t(
+                  'See if a release has low adoption, been adopted by users, or replaced by another release. Select an environment above to view the stage this release is in.'
+                )}
+                size="sm"
+              />
+            )
+          }
+        >
+          {adoptionStageLabel && !multipleEnvironments ? (
+            <div>
+              <Tooltip title={adoptionStageLabel.tooltipTitle} isHoverable>
+                <Tag type={adoptionStageLabel.type}>{adoptionStageLabel.name}</Tag>
+              </Tooltip>
+              <AdoptionEnvironment>
+                {tct(`in [environment]`, {environment})}
+              </AdoptionEnvironment>
+            </div>
+          ) : (
+            <NotAvailableWrapper>
+              <NotAvailable />
+            </NotAvailableWrapper>
+          )}
+        </SidebarSection>
       )}
       <RelativeBox>
         <ChartLabel top="0px">
