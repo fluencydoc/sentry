@@ -90,6 +90,10 @@ describe('TeamInsightsOverview', () => {
       body: TestStubs.TeamAlertsTriggered(),
     });
     MockApiClient.addMockResponse({
+      url: `/teams/org-slug/${team1.slug}/alerts-triggered-breakdown/`,
+      body: TestStubs.TeamAlertsTriggered(),
+    });
+    MockApiClient.addMockResponse({
       url: `/teams/org-slug/${team1.slug}/time-to-resolution/`,
       body: TestStubs.TeamResolutionTime(),
     });
@@ -105,6 +109,10 @@ describe('TeamInsightsOverview', () => {
     MockApiClient.addMockResponse({
       url: `/teams/org-slug/${team2.slug}/alerts-triggered/`,
       body: TestStubs.TeamAlertsTriggered(),
+    });
+    MockApiClient.addMockResponse({
+      url: `/teams/org-slug/${team2.slug}/alerts-triggered-breakdown/`,
+      body: TestStubs.TeamAlertsTriggeredBreakdown(),
     });
     MockApiClient.addMockResponse({
       url: `/teams/org-slug/${team2.slug}/time-to-resolution/`,

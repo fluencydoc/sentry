@@ -108,6 +108,7 @@ type TestStubFixtures = {
   Tags: OverridableStubList;
   Team: OverridableStub;
   TeamAlertsTriggered: SimpleStub;
+  TeamAlertsTriggeredBreakdown: SimpleStub;
   TeamIssuesReviewed: SimpleStub;
   TeamResolutionTime: SimpleStub;
   Tombstones: OverridableStubList;
