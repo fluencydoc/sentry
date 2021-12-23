@@ -5,7 +5,6 @@ import styled from '@emotion/styled';
 import pick from 'lodash/pick';
 
 import {fetchTagValues} from 'sentry/actionCreators/tags';
-import Feature from 'sentry/components/acl/feature';
 import Alert from 'sentry/components/alert';
 import GuideAnchor from 'sentry/components/assistant/guideAnchor';
 import EmptyStateWarning from 'sentry/components/emptyStateWarning';
@@ -482,7 +481,8 @@ class ReleasesList extends AsyncView<Props, State> {
       .map(id => `${id}`)
       .map(ProjectsStore.getById)
       .some(project => project?.platform && isMobileRelease(project.platform));
-    const showReleaseAdoptionStages = hasAnyMobileProject && selection.environments.length === 1;
+    const showReleaseAdoptionStages =
+      hasAnyMobileProject && selection.environments.length === 1;
     const hasReleasesSetup = releases && releases.length > 0;
 
     return (
